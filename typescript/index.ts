@@ -7,6 +7,7 @@
 
 import type { FlatfileEvent, FlatfileListener } from "@flatfile/listener";
 import type { FlatfileRecord } from "@flatfile/plugin-record-hook";
+import { ExcelExtractor } from "@flatfile/plugin-xlsx-extractor";
 
 import api from "@flatfile/api";
 import { recordHook } from "@flatfile/plugin-record-hook";
@@ -15,6 +16,8 @@ import { recordHook } from "@flatfile/plugin-record-hook";
 const webhookReceiver = "https://webhook.site/1234";
 
 export default function (listener: FlatfileListener) {
+  listener.use(ExcelExtractor());
+
   // Part 1: Setup a listener (https://flatfile.com/docs/apps/custom/meet-the-listener)
   listener.on("**", (event: FlatfileEvent) => {
     // Log all events
@@ -59,6 +62,11 @@ export default function (listener: FlatfileListener) {
                     type: "string",
                     label: "Email",
                   },
+                  {
+                    key: "phone",
+                    type: "string",
+                    label: "Phone",
+                  },
                 ],
               },
             ],
@@ -87,10 +95,11 @@ export default function (listener: FlatfileListener) {
             metadata: {
               theme: {
                 root: {
-                  primaryColor: "red",
+                  primaryColor: "#022043",
                 },
                 sidebar: {
-                  backgroundColor: "red",
+                  logo: "https://www.workday.com/content/dam/web/zz/images/logos/workday/workday-logo.svg",
+                  backgroundColor: "#022043",
                   textColor: "white",
                   activeTextColor: "midnightblue",
                 },
@@ -121,12 +130,24 @@ export default function (listener: FlatfileListener) {
     // Part 3: Transform and validate (https://flatfile.com/docs/apps/custom/add-data-transformation)
     red.use(
       recordHook("contacts", (record: FlatfileRecord) => {
+        const capitalize = (text) => {
+          const ret = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+          console.log(`${text}: ${ret}`);
+          return ret;
+        }
         // Validate and transform a Record's first name
-        const value = record.get("firstName");
-        if (typeof value === "string") {
-          record.set("firstName", value.toLowerCase());
+        const firstName = record.get("firstName");
+        if (typeof firstName === "string") {
+          record.set("firstName", capitalize(firstName));
         } else {
-          record.addError("firstName", "Invalid first name");
+          record.addError("firstName", "Invalid First name");
+        }
+
+        const lastName = record.get("lastName");
+        if (typeof lastName === "string") {
+          record.set("lastName", capitalize(lastName));
+        } else {
+          record.addError("lastName", "Invalid Last name");
         }
 
         // Validate a Record's email address
@@ -135,6 +156,14 @@ export default function (listener: FlatfileListener) {
         if (!validEmailAddress.test(email)) {
           console.log("Invalid email address");
           record.addError("email", "Invalid email address");
+        }
+
+        const phone = record.get("phone") as string;
+        const isValidPhone = /^\+?[1-9]\d{1,14}$/.test(phone);
+        if (!isValidPhone) {
+          const errorMessage = "Invalid phone number";
+          console.error(errorMessage);
+          record.addError("phone", errorMessage);
         }
 
         return record;

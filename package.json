@@ -20,6 +20,7 @@
     "@flatfile/api": "latest",
     "@flatfile/listener": "latest",
     "@flatfile/plugin-record-hook": "latest",
+    "@flatfile/plugin-xlsx-extractor": "^3.4.0",
     "flatfile": "latest"
   },
   "devDependencies": {
