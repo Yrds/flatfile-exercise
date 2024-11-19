@@ -19,6 +19,7 @@
   "dependencies": {
     "@flatfile/api": "latest",
     "@flatfile/listener": "latest",
+    "@flatfile/plugin-dedupe": "^1.5.0",
     "@flatfile/plugin-record-hook": "latest",
     "@flatfile/plugin-xlsx-extractor": "^3.4.0",
     "flatfile": "latest"

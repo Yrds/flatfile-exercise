@@ -7,7 +7,9 @@
 
 import type { FlatfileEvent, FlatfileListener } from "@flatfile/listener";
 import type { FlatfileRecord } from "@flatfile/plugin-record-hook";
+
 import { ExcelExtractor } from "@flatfile/plugin-xlsx-extractor";
+import { dedupePlugin } from "@flatfile/plugin-dedupe";
 
 import api from "@flatfile/api";
 import { recordHook } from "@flatfile/plugin-record-hook";
@@ -16,6 +18,12 @@ import { recordHook } from "@flatfile/plugin-record-hook";
 const webhookReceiver = "https://webhook.site/1234";
 
 export default function (listener: FlatfileListener) {
+  listener.use(
+    dedupePlugin("dedupe-email", {
+      on: "email",
+      keep: "last"
+    })
+  )
   listener.use(ExcelExtractor());
 
   // Part 1: Setup a listener (https://flatfile.com/docs/apps/custom/meet-the-listener)
@@ -68,6 +76,14 @@ export default function (listener: FlatfileListener) {
                     label: "Phone",
                   },
                 ],
+                actions: [
+                  {
+                    operation: "dedupe-email",
+                    mode: "background",
+                    label: "Dedupe emails",
+                    description: "Remove duplicate emails"
+                  },
+              ]
               },
             ],
             actions: [
