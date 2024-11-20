@@ -21,14 +21,38 @@ import { transformCapitalize } from "./transformations";
 
 const webhookReceiver = "https://webhook.site/1234";
 
+const {
+  createHash,
+} = require('node:crypto');
+
+
 export default function (listener: FlatfileListener) {
   listener.use(
-    dedupePlugin("dedupe-email", {
-      on: "email",
-      keep: "last"
-    })
-  )
+    dedupePlugin("dedupe-email", { 
+      custom: (records) => {
+        let uniques = new Set();
+        let toDelete = [];
+
+        records.forEach(record => {
+          const hash = createHash('md5');
+          hash.update(Object.values(record.values).join(";"));
+
+          const hashedValue = hash.digest('hex');
+
+          if (uniques.has(hashedValue)) {
+            toDelete.push(record.id);
+          } else {
+            uniques.add(hashedValue);
+          }
+        });
+
+        return toDelete;
+      }
+    }
+    ));
+
   listener.use(ExcelExtractor());
+
   listener.namespace(["space:red"], (red: FlatfileListener) => {
     red.use(configureSpace(
       {
