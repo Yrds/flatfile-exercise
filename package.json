@@ -21,6 +21,7 @@
     "@flatfile/listener": "latest",
     "@flatfile/plugin-dedupe": "^1.5.0",
     "@flatfile/plugin-record-hook": "latest",
+    "@flatfile/plugin-space-configure": "^0.8.0",
     "@flatfile/plugin-xlsx-extractor": "^3.4.0",
     "flatfile": "latest"
   },
